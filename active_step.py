@@ -47,17 +47,19 @@ learning_rate = 1e-5
 batch_size = 64
 epochs = 10
 
+select = 100
+
 # Initialize the loss function
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 logger_init("active-learning")
 
-for i in range(30):
+for i in range(len(train_total_image_set)//select):
     print(f'{i+1} STEP::')
     # Make Train Set Init
     if i == 0:
-        idx = np.arange(0, 5000)
+        idx = np.arange(0, select)
         train_image_set = train_total_image_set[idx]
         train_label_set = train_total_label_set[idx].squeeze()
     else:
@@ -68,7 +70,7 @@ for i in range(30):
             am = np.argmax(psm, axis=1)
             am_m = np.min(psm, axis=1)
             ags = np.argsort(am_m)
-            idx = ags[-5000:]
+            idx = ags[-1 * select:]
             # if i == 5:
             #     import pdb; pdb.set_trace()
             train_image_set = np.concatenate((train_image_set.numpy(), train_total_image_set[idx]), axis=0)
